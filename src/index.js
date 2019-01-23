@@ -394,6 +394,8 @@ export default class extends Component {
   updateIndex = (offset, dir, cb) => {
     const state = this.state
     let index = state.index
+    if (!this.internals.offset)   // Android not setting this onLayout first? https://github.com/leecade/react-native-swiper/issues/582
+      this.internals.offset = {}
     const diff = offset[dir] - this.internals.offset[dir]
     const step = dir === 'x' ? state.width : state.height
     let loopJump = false
@@ -628,6 +630,17 @@ export default class extends Component {
       {pages}
     </ScrollView>
   )
+
+  onPageScrollStateChanged = state => {
+    switch (state) {
+      case 'dragging':
+        return this.onScrollBegin();
+
+      case 'idle':
+      case 'settling':
+        if (this.props.onTouchEnd) this.props.onTouchEnd();
+    }
+  }
 
   /**
    * Default render
